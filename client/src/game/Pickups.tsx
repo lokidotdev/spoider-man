@@ -107,7 +107,7 @@ function PickupGlow({ color, seed }: { color: string; seed: number }) {
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.32}
+          opacity={0.17}
           side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
@@ -119,18 +119,18 @@ function PickupGlow({ color, seed }: { color: string; seed: number }) {
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.2}
+          opacity={0.1}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
       {/* Hovering ring: the crisp edge that makes the glow read as deliberate. */}
       <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.66, 0.026, 6, 36]} />
+        <torusGeometry args={[0.66, 0.018, 6, 36]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.95}
+          opacity={0.7}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
@@ -144,7 +144,7 @@ function PickupGlow({ color, seed }: { color: string; seed: number }) {
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.14}
+          opacity={0.07}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
@@ -155,7 +155,7 @@ function PickupGlow({ color, seed }: { color: string; seed: number }) {
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.4}
+          opacity={0.18}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
@@ -167,7 +167,7 @@ function PickupGlow({ color, seed }: { color: string; seed: number }) {
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.28}
+          opacity={0.12}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
@@ -195,8 +195,8 @@ function Pickup({ data, seed }: { data: PickupSnapshot; seed: number }) {
       <PickupGlow color={color} seed={seed} />
       {/* Ground halo, so a pickup reads even when the shape is edge-on. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.55, 0]}>
-        <circleGeometry args={[0.9, 24]} />
-        <meshBasicMaterial color={color} transparent opacity={0.42} depthWrite={false} />
+        <circleGeometry args={[0.75, 20]} />
+        <meshBasicMaterial color={color} transparent opacity={0.2} depthWrite={false} />
       </mesh>
     </group>
   );

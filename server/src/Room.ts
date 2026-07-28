@@ -151,8 +151,6 @@ export class Room {
 
   private phase: RoundState['phase'] = 'waiting';
   private roundEndsAt = 0;
-  /** Frozen remaining time while the room is below 2 players mid-round. */
-  private pausedRemaining: number | null = null;
   private intermissionEndsAt = 0;
   private winner: RoundState['winner'] = null;
 
@@ -720,7 +718,7 @@ export class Room {
     return [...this.players.values()].filter((p) => p.connected).length;
   }
 
-  /** Starts, pauses or resumes the round timer as the population changes. */
+  /** Starts or ends the round as the population changes. */
   private evaluateRoundStart(): void {
     const count = this.connectedCount();
 
@@ -729,20 +727,18 @@ export class Room {
     if (count >= 2) {
       if (this.phase === 'waiting') {
         this.phase = 'active';
-        // Resume a paused round rather than restarting it.
-        this.roundEndsAt = Date.now() + (this.pausedRemaining ?? ROUND_DURATION_MS);
-        this.pausedRemaining = null;
+        this.roundEndsAt = Date.now() + ROUND_DURATION_MS;
       }
     } else if (this.phase === 'active') {
-      // Solo again: freeze the clock, keep playing untimed.
-      this.pausedRemaining = Math.max(0, this.roundEndsAt - Date.now());
-      this.phase = 'waiting';
+      // Everyone else walked out mid-round: settle the match right now instead
+      // of leaving the last player alone on a frozen clock. Whoever is still
+      // here takes the win — a player who left isn't eligible for it.
+      this.endRound(this.scoreboard().filter((entry) => !entry.ghost));
     }
   }
 
-  private endRound(): void {
-    const board = this.scoreboard();
-    const best = board[0];
+  private endRound(candidates: ScoreEntry[] = this.scoreboard()): void {
+    const best = candidates[0];
     this.winner = best ? { name: best.name, score: best.score } : null;
     this.phase = 'intermission';
     this.intermissionEndsAt = Date.now() + WINNER_OVERLAY_MS;
@@ -758,7 +754,6 @@ export class Room {
       p.scoreReachedAt = Date.now();
     }
     this.winner = null;
-    this.pausedRemaining = null;
 
     if (this.connectedCount() >= 2) {
       this.phase = 'active';
@@ -797,8 +792,6 @@ export class Room {
   private roundState(): RoundState {
     let msRemaining: number | null = null;
     if (this.phase === 'active') msRemaining = Math.max(0, this.roundEndsAt - Date.now());
-    else if (this.phase === 'waiting' && this.pausedRemaining !== null)
-      msRemaining = this.pausedRemaining;
     else if (this.phase === 'intermission') msRemaining = 0;
 
     return { phase: this.phase, msRemaining, winner: this.winner };

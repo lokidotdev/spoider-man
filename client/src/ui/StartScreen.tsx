@@ -1,6 +1,7 @@
 import { useGame } from '../net/store';
 import { connect } from '../net/socket';
 import { initAudio } from '../audio/sfx';
+import spideyImage from '../assets/spidey.jpeg';
 
 /**
  * The whole pre-game flow: title, one line of description, one button.
@@ -23,6 +24,7 @@ export function StartScreen() {
   return (
     <div className="screen start-screen">
       <div className="start-card">
+        <img className="title-art" src={spideyImage} alt="" />
         <h1 className="title">
           Spoider<span className="title-accent"> Man</span>
         </h1>

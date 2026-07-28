@@ -77,6 +77,15 @@ kbd {
   text-align: center;
 }
 
+.title-art {
+  display: block;
+  width: min(220px, 55%);
+  margin: 0 auto 18px;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
 .title {
   margin: 0 0 6px;
   font-size: clamp(48px, 9vw, 86px);
@@ -484,14 +493,6 @@ kbd {
 .round-timer.urgent {
   color: #ff8a7e;
   border-color: rgba(226, 86, 74, 0.5);
-}
-
-.paused-tag {
-  margin-left: 8px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink-dim);
-  vertical-align: middle;
 }
 
 /* Kill feed */

@@ -211,12 +211,10 @@ function RoundTimer() {
   const total = Math.max(0, Math.floor(round.msRemaining / 1000));
   const mm = Math.floor(total / 60);
   const ss = String(total % 60).padStart(2, '0');
-  const paused = round.phase === 'waiting';
 
   return (
-    <div className={`round-timer${total <= 30 && !paused ? ' urgent' : ''}`}>
+    <div className={`round-timer${total <= 30 ? ' urgent' : ''}`}>
       {mm}:{ss}
-      {paused && <span className="paused-tag">paused</span>}
     </div>
   );
 }
