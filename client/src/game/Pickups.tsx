@@ -73,8 +73,113 @@ function PickupShape({ type }: { type: PickupType }) {
   );
 }
 
+/**
+ * How far the marker beam runs upward. Well past the far plane in practice, so
+ * it reads as going up forever from any angle a player can look from.
+ */
+const BEAM_HEIGHT = 500;
+
+/**
+ * Hollow glow: every layer is either an inside-out shell or an open tube, drawn
+ * additively with depth writes off. The item stays fully visible through it —
+ * the light reads as an aura around the pickup rather than a solid blob over it.
+ */
+function PickupGlow({ color, seed }: { color: string; seed: number }) {
+  const shell = useRef<THREE.Mesh>(null);
+  const ring = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    // Slow breathing pulse, offset per pickup so a cluster never throbs in sync.
+    const pulse = 1 + Math.sin(t * 2.2 + seed * 1.7) * 0.07;
+    shell.current?.scale.setScalar(pulse);
+    if (ring.current) {
+      ring.current.rotation.z = t * 0.9 + seed;
+      ring.current.position.y = Math.sin(t * 1.6 + seed) * 0.12;
+    }
+  });
+
+  return (
+    <group>
+      {/* Outer shell, back faces only: just the rim catches light. */}
+      <mesh ref={shell}>
+        <sphereGeometry args={[0.8, 20, 14]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.32}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      {/* Faint inner haze so the centre is not a hole. */}
+      <mesh>
+        <sphereGeometry args={[0.44, 16, 12]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.2}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      {/* Hovering ring: the crisp edge that makes the glow read as deliberate. */}
+      <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.66, 0.026, 6, 36]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.95}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      {/* Marker beam: a straight, untapered column running to the sky. Two open
+          tubes — a tight bright core inside a wider halo — so it stays legible
+          against both a light facade and open sky. Never culled, since the
+          bounding sphere of a 500m tube is huge but the beam is always wanted. */}
+      <mesh position={[0, BEAM_HEIGHT / 2, 0]} frustumCulled={false}>
+        <cylinderGeometry args={[0.5, 0.5, BEAM_HEIGHT, 16, 1, true]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.14}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh position={[0, BEAM_HEIGHT / 2, 0]} frustumCulled={false}>
+        <cylinderGeometry args={[0.17, 0.17, BEAM_HEIGHT, 12, 1, true]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.4}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      {/* Bright base flare where the beam meets the item — anchors it to the roof. */}
+      <mesh position={[0, 0.9, 0]}>
+        <cylinderGeometry args={[0.26, 0.72, 1.8, 16, 1, true]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.28}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
+  );
+}
+
 function Pickup({ data, seed }: { data: PickupSnapshot; seed: number }) {
   const group = useRef<THREE.Group>(null);
+  const color = pickupColor(data.type);
 
   useFrame((state) => {
     const g = group.current;
@@ -87,15 +192,11 @@ function Pickup({ data, seed }: { data: PickupSnapshot; seed: number }) {
   return (
     <group ref={group} position={[data.p.x, data.p.y, data.p.z]}>
       <PickupShape type={data.type} />
+      <PickupGlow color={color} seed={seed} />
       {/* Ground halo, so a pickup reads even when the shape is edge-on. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.55, 0]}>
-        <circleGeometry args={[0.75, 20]} />
-        <meshBasicMaterial
-          color={pickupColor(data.type)}
-          transparent
-          opacity={0.2}
-          depthWrite={false}
-        />
+        <circleGeometry args={[0.9, 24]} />
+        <meshBasicMaterial color={color} transparent opacity={0.42} depthWrite={false} />
       </mesh>
     </group>
   );

@@ -45,10 +45,12 @@ export const SWING_INPUT_FORCE = 26;
 // --- Pickups ---
 export const HEALTH_PICKUP_AMOUNT = 50;
 export const SHIELD_ABSORB = 50;
-export const MAX_ACTIVE_PICKUPS = 10;
-export const PICKUP_SPAWN_MIN_MS = 4000;
-export const PICKUP_SPAWN_MAX_MS = 7500;
+export const MAX_ACTIVE_PICKUPS = 15;
+export const PICKUP_SPAWN_MIN_MS = 3000;
+export const PICKUP_SPAWN_MAX_MS = 5500;
 export const PICKUP_RADIUS = 1.4;
+/** Minimum gap between two live pickups, so a freed spot is not instantly refilled. */
+export const PICKUP_SPAWN_SEPARATION = 6;
 /**
  * Share of pickups that spawn on the street instead of a rooftop. Kept low so
  * rooftops stay the reason to swing, while the ground is never fully empty.

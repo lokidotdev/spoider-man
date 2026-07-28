@@ -13,6 +13,7 @@ import {
   MAX_HP,
   MAX_PLAYERS_PER_ROOM,
   PICKUP_RADIUS,
+  PICKUP_SPAWN_SEPARATION,
   PICKUP_SPAWN_MAX_MS,
   PICKUP_SPAWN_MIN_MS,
   PICKUP_WEIGHTS,
@@ -349,7 +350,7 @@ export class Room {
     if (pickup.type === 'health') {
       if (p.hp >= MAX_HP) return;
       p.hp = Math.min(MAX_HP, p.hp + HEALTH_PICKUP_AMOUNT);
-      this.pickups.delete(pickupId);
+      this.consumePickup(pickupId);
       this.sendSelf(p);
       return;
     }
@@ -357,7 +358,7 @@ export class Room {
     if (pickup.type === 'shield') {
       if (p.shield >= SHIELD_ABSORB) return;
       p.shield = SHIELD_ABSORB;
-      this.pickups.delete(pickupId);
+      this.consumePickup(pickupId);
       this.sendSelf(p);
       return;
     }
@@ -388,7 +389,9 @@ export class Room {
     p.reloadingUntil = 0;
     this.pickups.delete(pickupId);
 
-    // The swapped-out gun stays available to everyone else, ammo intact.
+    // The swapped-out gun stays available to everyone else, ammo intact, and
+    // takes over the vacated spot. With nothing to leave behind, the spot is
+    // freed for good and a replacement pickup rolls a fresh point elsewhere.
     if (previous && previous.mag + previous.reserve > 0) {
       const droppedId = uid('pk');
       this.pickups.set(droppedId, {
@@ -398,6 +401,8 @@ export class Room {
         mag: previous.mag,
         reserve: previous.reserve,
       });
+    } else {
+      this.spawnPickup();
     }
   }
 
@@ -665,16 +670,48 @@ export class Room {
 
   // ---------------------------------------------------------------- pickups
 
+  /**
+   * A fresh spawn point that no live pickup is already sitting on, so a
+   * collected spot is genuinely vacated rather than immediately refilled.
+   * Rejection-sampled; falls back to the last roll if the arena is crowded.
+   */
+  private freeSpawnPoint(): { x: number; y: number; z: number } {
+    let spot = { x: 0, y: 0, z: 0 };
+    for (let attempt = 0; attempt < 24; attempt++) {
+      spot = Math.random() < GROUND_PICKUP_CHANCE ? randomGroundPoint() : randomRooftopPoint();
+      let clear = true;
+      for (const other of this.pickups.values()) {
+        const dx = other.pos.x - spot.x;
+        const dy = other.pos.y - (spot.y + 0.6);
+        const dz = other.pos.z - spot.z;
+        if (dx * dx + dy * dy + dz * dz < PICKUP_SPAWN_SEPARATION * PICKUP_SPAWN_SEPARATION) {
+          clear = false;
+          break;
+        }
+      }
+      if (clear) return spot;
+    }
+    return spot;
+  }
+
   private spawnPickup(): void {
     if (this.pickups.size >= MAX_ACTIVE_PICKUPS) return;
-    const spot =
-      Math.random() < GROUND_PICKUP_CHANCE ? randomGroundPoint() : randomRooftopPoint();
+    const spot = this.freeSpawnPoint();
     const id = uid('pk');
     this.pickups.set(id, {
       id,
       type: rollPickupType(),
       pos: vec(spot.x, spot.y + 0.6, spot.z),
     });
+  }
+
+  /**
+   * Called whenever a pickup is consumed: the spot it occupied is gone, and a
+   * replacement appears somewhere else so the arena keeps its item density.
+   */
+  private consumePickup(pickupId: string): void {
+    this.pickups.delete(pickupId);
+    this.spawnPickup();
   }
 
   // ----------------------------------------------------------------- round

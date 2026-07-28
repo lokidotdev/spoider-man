@@ -26,23 +26,29 @@ export const GROUND_Y = 0;
 /** Below this the player is unrecoverably falling and dies. */
 export const DEATH_Y = -4;
 
+/**
+ * Colors are deliberately distinct per building: under overcast light a uniform
+ * grey city gives no landmarks, so each tower gets its own hue to navigate by.
+ * All are light and high-value — a bright city keeps the dark player silhouette
+ * and the glowing pickups readable against the facades from across the arena.
+ */
 export const BUILDINGS: Building[] = [
   // --- Central tower: tallest reference point at world origin ---
-  { id: 'central', x: 0, z: 0, width: 15, depth: 15, height: 45, color: '#6a7484' },
+  { id: 'central', x: 0, z: 0, width: 15, depth: 15, height: 45, color: '#e6cdb4' },
 
   // --- Shorter neighbours, footprints touching central ---
-  { id: 'west-low', x: -11.5, z: 0, width: 8, depth: 12, height: 26, color: '#5d6673' },
-  { id: 'north-low', x: 0, z: 11, width: 12, depth: 7, height: 30, color: '#646d7c' },
+  { id: 'west-low', x: -11.5, z: 0, width: 8, depth: 12, height: 26, color: '#c3e0cd' },
+  { id: 'north-low', x: 0, z: 11, width: 12, depth: 7, height: 30, color: '#efe0b0' },
 
   // --- Taller neighbours, also touching central: high-value swing anchors ---
-  { id: 'east-tall', x: 12.5, z: 0, width: 10, depth: 14, height: 58, color: '#727c8c' },
-  { id: 'south-tall', x: 0, z: -12, width: 14, depth: 9, height: 52, color: '#6d7686' },
+  { id: 'east-tall', x: 12.5, z: 0, width: 10, depth: 14, height: 58, color: '#c6d6f0' },
+  { id: 'south-tall', x: 0, z: -12, width: 14, depth: 9, height: 52, color: '#f0c8cd' },
 
   // --- Outer ring: separated by gaps that need a swing chain to cross ---
-  { id: 'outer-sw', x: -30, z: -22, width: 11, depth: 11, height: 34, color: '#59616e' },
-  { id: 'outer-se', x: 28, z: -26, width: 13, depth: 9, height: 28, color: '#616a78' },
-  { id: 'outer-nw', x: -26, z: 26, width: 9, depth: 14, height: 38, color: '#5e6773' },
-  { id: 'outer-ne', x: 30, z: 22, width: 12, depth: 12, height: 22, color: '#656e7b' },
+  { id: 'outer-sw', x: -30, z: -22, width: 11, depth: 11, height: 34, color: '#d9cbee' },
+  { id: 'outer-se', x: 28, z: -26, width: 13, depth: 9, height: 28, color: '#bfe2e8' },
+  { id: 'outer-nw', x: -26, z: 26, width: 9, depth: 14, height: 38, color: '#ecd8c2' },
+  { id: 'outer-ne', x: 30, z: 22, width: 12, depth: 12, height: 22, color: '#d5e8bb' },
 ];
 
 /** Half-extent of the ground plane; also the outer bound of the playable area. */

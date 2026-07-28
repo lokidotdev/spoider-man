@@ -252,4 +252,15 @@ export const sfx = {
     setTimeout(() => tone(220, 0.06, 'square', 0.1), 110);
   },
 
-  joi
+  join(): void {
+    tone(600, 0.09, 'sine', 0.1);
+    setTimeout(() => tone(900, 0.11, 'sine', 0.09), 90);
+  },
+
+  roundEnd(): void {
+    // Little three-note fanfare for the winner overlay.
+    tone(523, 0.18, 'triangle', 0.2);
+    setTimeout(() => tone(659, 0.18, 'triangle', 0.2), 160);
+    setTimeout(() => tone(784, 0.34, 'triangle', 0.22), 320);
+  },
+};

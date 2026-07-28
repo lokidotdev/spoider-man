@@ -61,16 +61,17 @@ function BuildingMesh({ b, facade }: { b: Building; facade: THREE.Texture }) {
         <meshStandardMaterial color={b.color} map={tex} roughness={0.85} metalness={0.05} />
       </mesh>
 
-      {/* Roof cap: a slightly darker slab so rooftops read as walkable surfaces. */}
+      {/* Roof cap: a mid-grey slab, darker than the facades so rooftops still
+          read as walkable surfaces without dropping back to a dark city. */}
       <mesh position={[0, b.height / 2 + 0.06, 0]} receiveShadow>
         <boxGeometry args={[b.width + 0.3, 0.12, b.depth + 0.3]} />
-        <meshStandardMaterial color="#4a515c" roughness={0.95} />
+        <meshStandardMaterial color="#9aa3ae" roughness={0.95} />
       </mesh>
 
       {/* Parapet trim around the roof edge, purely visual (collider stays a clean box). */}
       <mesh position={[0, b.height / 2 + 0.3, 0]}>
         <boxGeometry args={[b.width + 0.34, 0.55, b.depth + 0.34]} />
-        <meshStandardMaterial color="#3e4550" roughness={0.9} transparent opacity={0.55} />
+        <meshStandardMaterial color="#848d9a" roughness={0.9} transparent opacity={0.55} />
       </mesh>
     </RigidBody>
   );
@@ -100,7 +101,7 @@ function RoofProps({ b }: { b: Building }) {
       {props.map((p, i) => (
         <mesh key={i} position={[b.x + p.x, b.height + p.h / 2, b.z + p.z]} castShadow>
           <boxGeometry args={[p.w, p.h, p.d]} />
-          <meshStandardMaterial color="#525a66" roughness={0.9} />
+          <meshStandardMaterial color="#aab2bd" roughness={0.9} />
         </mesh>
       ))}
     </group>
